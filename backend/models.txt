@@ -1,0 +1,2 @@
+Embedding models with embedContent:
+models/gemini-embedding-001

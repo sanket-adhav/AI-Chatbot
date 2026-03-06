@@ -1,0 +1,32 @@
+# get_network_request response
+## Request http://localhost:8000/auth/login
+Status:  [failed - 422]
+### Request Headers
+- sec-ch-ua-platform:"macOS"
+- referer:http://localhost:5173/
+- user-agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36
+- accept:application/json, text/plain, */*
+- sec-ch-ua:"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"
+- content-type:application/json
+- sec-ch-ua-mobile:?0
+- accept-encoding:gzip, deflate, br, zstd
+- accept-language:en-GB,en-US;q=0.9,en;q=0.8
+- connection:keep-alive
+- content-length:26
+- host:localhost:8000
+- origin:http://localhost:5173
+- sec-fetch-dest:empty
+- sec-fetch-mode:cors
+- sec-fetch-site:same-site
+### Request Body
+{"email":"","password":""}
+### Response Headers
+- access-control-allow-credentials:true
+- access-control-allow-origin:http://localhost:5173
+- content-length:208
+- content-type:application/json
+- date:Fri, 20 Feb 2026 10:55:01 GMT
+- server:uvicorn
+- vary:Origin
+### Response Body
+{"detail":[{"type":"value_error","loc":["body","email"],"msg":"value is not a valid email address: An email address must have an @-sign.","input":"","ctx":{"reason":"An email address must have an @-sign."}}]}

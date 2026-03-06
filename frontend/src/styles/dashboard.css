@@ -1,0 +1,294 @@
+/* ── Dashboard Layout ────────────────────────────────────────────────────── */
+.dashboard-container {
+    padding: 32px 40px;
+    height: 100%;
+    overflow-y: auto;
+    color: var(--text-primary);
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.dashboard-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+    margin-bottom: 8px;
+}
+
+.dashboard-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dashboard-subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.dashboard-select {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23929EAD' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+    transition: all var(--transition-fast);
+}
+
+.dashboard-select:hover {
+    border-color: var(--border-active);
+    background-color: var(--bg-hover);
+}
+
+.dashboard-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.dashboard-btn-export {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.dashboard-btn-export:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-active);
+    color: var(--text-primary);
+}
+
+/* ── Summary Cards ───────────────────────────────────────────────────────── */
+.dashboard-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.dashboard-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-active);
+}
+
+/* Subtle glow effect on hover */
+.dashboard-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at top right, rgba(124, 92, 252, 0.1), transparent 70%);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    pointer-events: none;
+}
+
+.dashboard-card:hover::before {
+    opacity: 1;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.card-icon {
+    font-size: 18px;
+    opacity: 0.8;
+}
+
+.card-value {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.card-value.gradient-text {
+    background: linear-gradient(135deg, #7c5cfc 0%, #00c9a7 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.card-trend {
+    font-size: 13px;
+    margin-top: auto;
+}
+
+.text-green {
+    color: #00c9a7;
+}
+
+/* ── Charts Grid ─────────────────────────────────────────────────────────── */
+.dashboard-charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+.dashboard-chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-sm);
+}
+
+
+.chart-header {
+    margin-bottom: 20px;
+}
+
+.chart-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.chart-container {
+    width: 100%;
+    position: relative;
+    /* recharts overrides some fonts, ensure we match */
+    font-family: inherit;
+}
+
+/* Fix Recharts Tooltip styling */
+.recharts-default-tooltip {
+    background-color: var(--bg-panel) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-md) !important;
+    backdrop-filter: blur(10px);
+}
+
+.recharts-tooltip-item {
+    color: var(--text-primary) !important;
+}
+
+.recharts-tooltip-label {
+    color: var(--text-muted) !important;
+    margin-bottom: 4px !important;
+}
+
+/* ── Bottom Stats ────────────────────────────────────────────────────────── */
+.dashboard-bottom-stats {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.stat-pill {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 13px;
+}
+
+.stat-pill-label {
+    color: var(--text-muted);
+}
+
+.stat-pill-value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Loading State */
+.dashboard-container.loading {
+    justify-content: center;
+    align-items: center;
+}
+
+.dashboard-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(124, 92, 252, 0.2);
+    border-radius: 50%;
+    border-top-color: #7c5cfc;
+    animation: dashSpin 1s ease-in-out infinite;
+}
+
+@keyframes dashSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .dashboard-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-container {
+        padding: 20px;
+    }
+}
