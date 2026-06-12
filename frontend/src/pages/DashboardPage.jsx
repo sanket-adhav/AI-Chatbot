@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
-import { fetchAnalyticsSummary, fetchAnalyticsDaily, fetchAnalyticsAgents } from '../api/client'
+import { useRef } from 'react'
+import { useAnalytics } from '../hooks/useAnalytics'
+import { formatNumber, formatCurrency } from '../utils/formatters'
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     BarChart, Bar, Cell
@@ -8,54 +9,16 @@ import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 
 export default function DashboardPage() {
-    const [summary, setSummary] = useState(null)
-    const [dailyData, setDailyData] = useState([])
-    const [agentData, setAgentData] = useState([])
-    const [daysFilter, setDaysFilter] = useState(30)
-    const [loading, setLoading] = useState(true)
+    const {
+        summary,
+        dailyData,
+        agentData,
+        daysFilter,
+        setDaysFilter,
+        loading
+    } = useAnalytics(30)
+    
     const dashboardRef = useRef(null)
-
-    useEffect(() => {
-        let isMounted = true
-        setLoading(true)
-
-        Promise.all([
-            fetchAnalyticsSummary(),
-            fetchAnalyticsDaily(daysFilter),
-            fetchAnalyticsAgents()
-        ]).then(([sumData, dData, aData]) => {
-            if (isMounted) {
-                setSummary(sumData)
-
-                // Format daily dates
-                const formattedDaily = dData.map(d => {
-                    const dateObj = new Date(d.date)
-                    return {
-                        ...d,
-                        formattedDate: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                    }
-                })
-                setDailyData(formattedDaily)
-                setAgentData(aData)
-                setLoading(false)
-            }
-        }).catch(err => {
-            console.error("Failed to load analytics", err)
-            if (isMounted) setLoading(false)
-        })
-
-        return () => { isMounted = false }
-    }, [daysFilter])
-
-    const formatNumber = (num) => {
-        if (num === null || num === undefined) return '0'
-        return new Intl.NumberFormat('en-US').format(num)
-    }
-
-    const formatCurrency = (num) => {
-        if (num === null || num === undefined) return '$0.00'
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num)
-    }
 
     const exportToPDF = async () => {
         const element = dashboardRef.current

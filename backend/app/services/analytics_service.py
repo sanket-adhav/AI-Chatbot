@@ -110,12 +110,18 @@ def get_analytics_summary(db: Session, user_id: int, days: int = 30):
 def get_daily_analytics(db: Session, user_id: int, days: int = 30):
     start_date = datetime.utcnow() - timedelta(days=days)
     
-    # Using cross-platform approach: cast to Date
-    from sqlalchemy.types import Date
+    # Check database dialect to handle SQLite compatibility
+    dialect_name = db.bind.dialect.name if db.bind else "sqlite"
+    
+    if dialect_name == "sqlite":
+        date_expr = func.date(Message.created_at).label("date")
+    else:
+        from sqlalchemy.types import Date
+        date_expr = func.cast(Message.created_at, Date).label("date")
     
     daily_stats = (
         db.query(
-            func.cast(Message.created_at, Date).label("date"),
+            date_expr,
             func.count(Message.id).label("messages_count"),
             func.sum(Message.total_tokens).label("tokens_used")
         )
@@ -123,8 +129,8 @@ def get_daily_analytics(db: Session, user_id: int, days: int = 30):
         .join(Conversation, Message.conversation_id == Conversation.id)
         .filter(Conversation.user_id == user_id)
         .filter(Message.created_at >= start_date)
-        .group_by(func.cast(Message.created_at, Date))
-        .order_by(func.cast(Message.created_at, Date))
+        .group_by(date_expr)
+        .order_by(date_expr)
         .all()
     )
     

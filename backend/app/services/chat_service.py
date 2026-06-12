@@ -5,10 +5,11 @@ from fastapi import HTTPException
 
 from app.models.conversation import Conversation
 from app.models.message import Message
-from app.schemas.schemas import ConversationCreate
+from app.schemas import ConversationCreate
 from app.services.agent_service import get_agent_by_id
-from app.services.gemini_service import get_gemini_response, get_gemini_vision_response, stream_gemini_response
-from app.services.document_service import document_service
+from app.services.ai.gemini_service import get_gemini_response, stream_gemini_response
+from app.services.ai.vision_service import get_gemini_vision_response
+from app.services.rag.retrieval_service import retrieve_document_context
 
 
 # ── Conversation CRUD ─────────────────────────────────────────────────────────
@@ -107,7 +108,7 @@ def send_message(db: Session, conv_id: int, user_content: str, use_documents: bo
         final_instruction += f"\n\n[USER GLOBAL INSTRUCTIONS]:\n{conv.user.system_prompt}"
         
     if use_documents and user_id is not None:
-        doc_context = document_service.search_documents(user_content, user_id)
+        doc_context = retrieve_document_context(user_content, user_id)
         if doc_context:
             final_instruction += f"\n\n[DOCUMENT CONTEXT]:\nYou are a document-aware assistant. Use ONLY the provided context below to answer accurately. If the answer is not in the context, say you don't know based on the documents.\n{doc_context}"
 
@@ -200,7 +201,7 @@ def prepare_stream_message(db: Session, conv_id: int, user_content: str, use_doc
     
     final_instruction = agent.instruction_template
     if use_documents and user_id is not None:
-        doc_context = document_service.search_documents(user_content, user_id)
+        doc_context = retrieve_document_context(user_content, user_id)
         if doc_context:
             final_instruction += f"\n\n[DOCUMENT CONTEXT]:\nYou are a document-aware assistant. Use ONLY the provided context below to answer accurately. If the answer is not in the context, say you don't know based on the documents.\n{doc_context}"
 

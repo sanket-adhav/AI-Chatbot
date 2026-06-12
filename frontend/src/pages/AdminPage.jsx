@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { getAccessToken } from '../api/client'
+import { API_BASE_URL } from '../utils/constants'
 
-const BASE_URL = 'http://localhost:8000'
+const BASE_URL = API_BASE_URL
 
 // --- Premium Corporate Dark Theme Styles ---
 const styles = {

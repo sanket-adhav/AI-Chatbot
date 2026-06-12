@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
-import Sidebar from './components/Sidebar'
+import Sidebar from './components/chat/Sidebar'
 import ChatPage from './pages/ChatPage'
 import ConfigPage from './pages/ConfigPage'
 import DashboardPage from './pages/DashboardPage'
-import AgentLandingPage from './pages/AgentLandingPage'
+import AgentPage from './pages/AgentPage'
 import AuthPage from './pages/AuthPage'
 import AdminPage from './pages/AdminPage'
-import { isAuthenticated, clearAuth, getUser } from './api/client'
+import ErrorBoundary from './components/common/ErrorBoundary'
+import { AuthProvider, useAuthContext } from './context/AuthContext'
+import { ThemeProvider } from './context/ThemeContext'
+import { useAuth } from './hooks/useAuth'
 import './styles/global.css'
 import './styles/dashboard.css'
 import './styles/model-selector.css'
@@ -15,20 +18,9 @@ import './styles/model-selector.css'
 function AppShell() {
     const navigate = useNavigate()
     const location = useLocation()
+    const { authed, user, logout, updateUser } = useAuth()
     const [sidebarRefresh, setSidebarRefresh] = useState(0)
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-    const [authed, setAuthed] = useState(isAuthenticated)
-
-    // Store user in state to easily update their local data with SettingsModal
-    const [user, setUser] = useState(() => getUser())
-
-    useEffect(() => {
-        if (user && user.theme_preference) {
-            document.documentElement.setAttribute('data-theme', user.theme_preference)
-        } else {
-            document.documentElement.setAttribute('data-theme', 'dark')
-        }
-    }, [user])
 
     // Slide state: 'landing' | 'sliding' | 'chat'
     const [view, setView] = useState('landing')
@@ -36,10 +28,8 @@ function AppShell() {
     const chatMatch = location.pathname.match(/^\/chat\/(\d+)/)
     const activeConvId = chatMatch ? Number(chatMatch[1]) : null
 
-    const handleAuth = () => {
-        setAuthed(true)
-        const u = getUser()
-        setUser(u)
+    const handleAuth = (loggedInUser) => {
+        const u = loggedInUser || user
         if (u?.role === 'admin') {
             navigate('/admin')
         } else {
@@ -49,9 +39,7 @@ function AppShell() {
     }
 
     const handleLogout = () => {
-        clearAuth()
-        setAuthed(false)
-        setUser(null)
+        logout()
         setView('landing')
         navigate('/')
     }
@@ -68,10 +56,7 @@ function AppShell() {
     const handleNewChat = () => setView('landing')
 
     const handleProfileUpdated = (updatedUser) => {
-        // user helper 'saveUser' wasn't directly imported but we can import it
-        // actually easier to just set local storage directly here
-        localStorage.setItem('user', JSON.stringify(updatedUser))
-        setUser(updatedUser)
+        updateUser(updatedUser)
     }
 
     const isNonChatRoute = location.pathname === '/config' || location.pathname === '/dashboard'
@@ -97,7 +82,7 @@ function AppShell() {
             {/* LANDING SCREEN — slides out left */}
             {(view === 'landing' || view === 'sliding') && !isNonChatRoute && (
                 <div className={`landing-slide-wrapper ${view === 'sliding' ? 'slide-out-left' : ''}`}>
-                    <AgentLandingPage onStartChat={handleStartChat} onLogout={handleLogout} />
+                    <AgentPage onStartChat={handleStartChat} onLogout={handleLogout} />
                 </div>
             )}
 
@@ -127,16 +112,18 @@ function AppShell() {
     )
 }
 
-import ErrorBoundary from './components/ErrorBoundary'
-
 export default function App() {
     return (
         <ErrorBoundary>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/*" element={<AppShell />} />
-                </Routes>
-            </BrowserRouter>
+            <AuthProvider>
+                <ThemeProvider>
+                    <BrowserRouter>
+                        <Routes>
+                            <Route path="/*" element={<AppShell />} />
+                        </Routes>
+                    </BrowserRouter>
+                </ThemeProvider>
+            </AuthProvider>
         </ErrorBoundary>
     )
 }

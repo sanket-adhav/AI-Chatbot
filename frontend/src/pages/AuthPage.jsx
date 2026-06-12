@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { register, login, saveTokens, saveUser, fetchMe } from '../api/client'
+import { register } from '../api/client'
+import { useAuth } from '../hooks/useAuth'
+import { validateEmail, validatePassword, validateUsername } from '../utils/validators'
 
 const FEATURES = [
     { icon: '⚡', label: 'Real-time streaming responses' },
@@ -8,6 +10,7 @@ const FEATURES = [
 ]
 
 export default function AuthPage({ onAuth }) {
+    const { login } = useAuth()
     const [mode, setMode] = useState('login')
     const [form, setForm] = useState({ username: '', email: '', password: '', confirm: '' })
     const [showPass, setShowPass] = useState(false)
@@ -22,6 +25,25 @@ export default function AuthPage({ onAuth }) {
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError('')
+        
+        if (mode === 'register') {
+            const userErr = validateUsername(form.username)
+            if (userErr) {
+                setError(userErr)
+                return
+            }
+        }
+        const emailErr = validateEmail(form.email)
+        if (emailErr) {
+            setError(emailErr)
+            return
+        }
+        const passErr = validatePassword(form.password)
+        if (passErr) {
+            setError(passErr)
+            return
+        }
+
         if (mode === 'register' && form.password !== form.confirm) {
             setError('Passwords do not match')
             return
@@ -31,13 +53,8 @@ export default function AuthPage({ onAuth }) {
             if (mode === 'register') {
                 await register({ username: form.username, email: form.email, password: form.password })
             }
-            const tokens = await login({ email: form.email, password: form.password })
-            saveTokens(tokens.access_token, tokens.refresh_token)
-
-            const user = await fetchMe()
-            saveUser(user)
-
-            onAuth()
+            const loggedInUser = await login(form.email, form.password)
+            onAuth(loggedInUser)
         } catch (err) {
             const detail = err.response?.data?.detail
             setError(typeof detail === 'string' ? detail : 'Something went wrong. Please try again.')

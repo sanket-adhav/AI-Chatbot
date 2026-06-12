@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from app.db.database import Base
+from app.core.database import Base
 import app.models  # noqa: F401 — register all models
 
 config = context.config

@@ -8,22 +8,13 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from app.core.config import settings
 from app.core.rate_limit import limiter
-from app.core.errors import not_found_handler, general_exception_handler
-from app.db.database import engine, SessionLocal
-from app.db.database import Base
+from app.core.exceptions import not_found_handler, general_exception_handler
+from app.core.database import engine, SessionLocal, Base
 
 # Import all models so Base knows about them before create_all
 import app.models  # noqa: F401
 
-from app.api import agents, conversations, messages, health
-from app.api import auth as auth_router
-from app.api import search as search_router
-from app.api import export as export_router
-from app.api import uploads as uploads_router
-from app.api import stream as stream_router
-from app.api import documents as documents_router
-from app.api import analytics as analytics_router
-from app.api import admin as admin_router
+from app.api.v1 import auth, agents, chats, documents, analytics, admin, health
 from app.services.agent_service import seed_agents
 from app.models.user import User
 from app.models.system_settings import SystemSettings
@@ -58,24 +49,18 @@ def create_app() -> FastAPI:
 
     # ── Routers ───────────────────────────────────────────────────────────────
     app.include_router(health.router)
-    app.include_router(auth_router.router)
+    app.include_router(auth.router)
     app.include_router(agents.router)
-    from app.api import folders
-    app.include_router(folders.router)
-    app.include_router(conversations.router)
-    app.include_router(messages.router)
-    app.include_router(search_router.router)
-    app.include_router(export_router.router)
-    app.include_router(uploads_router.router)
-    app.include_router(stream_router.router)
-    app.include_router(documents_router.router)
-    app.include_router(analytics_router.router)
-    app.include_router(admin_router.router)
+    app.include_router(chats.folders_router)
+    app.include_router(chats.router)
+    app.include_router(chats.search_router)
+    app.include_router(documents.router)
+    app.include_router(analytics.router)
+    app.include_router(admin.router)
 
     # Maintenance Mode Middleware
     @app.middleware("http")
     async def maintenance_middleware(request: Request, call_next):
-        # Exclude admin routes from maintenance mode so we can turn it off!
         if request.url.path.startswith("/admin") or request.url.path.startswith("/api/admin"):
             return await call_next(request)
             
@@ -94,8 +79,8 @@ def create_app() -> FastAPI:
 
     # Serve uploaded images
     from pathlib import Path
-    uploads_path = Path(__file__).parent.parent / "uploads"
-    uploads_path.mkdir(exist_ok=True)
+    uploads_path = Path(__file__).parent.parent / "data" / "uploads"
+    uploads_path.mkdir(exist_ok=True, parents=True)
     app.mount("/uploads", StaticFiles(directory=str(uploads_path)), name="uploads")
 
     # ── Startup ───────────────────────────────────────────────────────────────
